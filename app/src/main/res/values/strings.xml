@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">MovieApp</string>
+    <string name="action_settings_title">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Details Strings -->
+    <string name="details_title_label">Title</string>
+    <string name="details_rating_label">Rating</string>
+    <string name="details_date_label">Date</string>
+    <string name="details_overview_label">Overview</string>
+    <string name="details_reviews_label">REVIEWS</string>
+    <string name="details_trailers_label">TRAILERS</string>
+    <string name="details_add_favorites_label">Add To Favorites</string>
+    <string name="details_remove_favorites_label">Remove From Favorites</string>
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="sort_toprated_label">Top Rated</string>
+    <string name="sort_mostpop_label">Most Popular</string>
+    <string name="sort_favorites_label">Favorites</string>
+    <string name="sort_toprated">top_rated</string>
+    <string name="sort_mostpop">popular</string>
+    <string name="sort_favorites">favorites</string>
+
+    <string-array name="pref_sort_values">
+        <item>@string/sort_toprated</item>
+        <item>@string/sort_mostpop</item>
+        <item>@string/sort_favorites</item>
+    </string-array>
+    <string-array name="pref_sort_options">
+        <item>@string/sort_toprated_label</item>
+        <item>@string/sort_mostpop_label</item>
+        <item>@string/sort_favorites_label</item>
+    </string-array>
+
+</resources>
