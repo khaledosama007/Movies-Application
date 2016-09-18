@@ -2,6 +2,7 @@ package movie.android.com.movieapp;
 
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -42,7 +43,7 @@ public class MovieDetailsFragment extends android.support.v4.app.Fragment {
     private TextView mDateView;
     private TextView mPlotView;
     private TrailerAdapter trailerAdapter;
-    private ArrayList<Trailer> trailers;
+    public ArrayList<Trailer> trailers;
     private ArrayList<Review> reviews;
     private LinearLayout trailerListView;
     private LinearLayout reviewListView;
@@ -185,7 +186,8 @@ public class MovieDetailsFragment extends android.support.v4.app.Fragment {
                 View view = trailerAdapter.getView(i, null, trailerListView);
                 trailerListView.addView(view);
             }
-
+            MovieDetails movieDetails = (MovieDetails) getActivity();
+            movieDetails.mShareActionProvider.setShareIntent(createShareIntent());
         }
 
         @Override
@@ -437,5 +439,12 @@ public class MovieDetailsFragment extends android.support.v4.app.Fragment {
         }
         return false;
     }
-
+    public Intent createShareIntent(){
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.putExtra(Intent.EXTRA_TEXT , URLs.YOUTUBE_LINK + trailers.get(0).getKey());
+        //startActivity(shareIntent);
+        return shareIntent;
+    }
 }
