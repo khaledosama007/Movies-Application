@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,6 +33,9 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import movie.android.com.movieapp.database.MovieContract;
+import movie.android.com.movieapp.models.Movie;
+import movie.android.com.movieapp.models.Review;
+import movie.android.com.movieapp.models.Trailer;
 
 public class MovieDetailsFragment extends android.support.v4.app.Fragment {
     private Movie mMovie = null;
@@ -443,8 +445,12 @@ public class MovieDetailsFragment extends android.support.v4.app.Fragment {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        shareIntent.putExtra(Intent.EXTRA_TEXT , URLs.YOUTUBE_LINK + trailers.get(0).getKey());
-        //startActivity(shareIntent);
+        if(trailers.size() == 0){
+            shareIntent.putExtra(Intent.EXTRA_TEXT , "No Trailers Available yet !");
+        }
+        else {
+            shareIntent.putExtra(Intent.EXTRA_TEXT , URLs.YOUTUBE_LINK + trailers.get(0).getKey());
+        }
         return shareIntent;
     }
 }

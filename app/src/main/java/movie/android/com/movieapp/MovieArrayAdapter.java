@@ -14,6 +14,8 @@ import com.squareup.picasso.Picasso;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import movie.android.com.movieapp.models.Movie;
+
 /**
  * adapter to fill movies grid view
  */

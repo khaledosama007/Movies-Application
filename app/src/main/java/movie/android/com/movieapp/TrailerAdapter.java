@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import movie.android.com.movieapp.models.Trailer;
+
 public class TrailerAdapter extends BaseAdapter {
     private Context context;
     private LayoutInflater inflater;

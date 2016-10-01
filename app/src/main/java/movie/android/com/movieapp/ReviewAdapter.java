@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import movie.android.com.movieapp.models.Review;
+
 
 public class ReviewAdapter extends BaseAdapter {
     private Context context;

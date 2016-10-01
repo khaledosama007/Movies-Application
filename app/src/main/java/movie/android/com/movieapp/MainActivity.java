@@ -2,14 +2,12 @@ package movie.android.com.movieapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AbsListView;
 
-import java.util.ArrayList;
+import movie.android.com.movieapp.models.Movie;
 
 
 public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callback {
