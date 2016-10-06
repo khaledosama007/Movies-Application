@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/touch_selector"
     >
@@ -10,7 +10,6 @@
         android:id="@+id/grid_view_list_item"
         android:layout_width="fill_parent"
         android:layout_height="250dp"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
         />
 </LinearLayout>

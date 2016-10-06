@@ -9,15 +9,12 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -49,8 +46,9 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
     private MovieArrayAdapter mArrayAdapter;
     private static final String SELECTED = "selected_position";
     private int mPosition = GridView.INVALID_POSITION;
-    private RecyclerViewMovieAdapter recycleAdapter;
-    public static RecyclerView grid;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private RequestQueue mRequestQueue;
+
     public MainActivityFragment() {
 
     }
@@ -65,7 +63,7 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
             mAllMovies = new ArrayList<>();
         }
         mSortMethod = Utils.getPreferredSortMethod(getActivity());
-        recycleAdapter = new RecyclerViewMovieAdapter(getContext() , mAllMovies);
+        mArrayAdapter = new MovieArrayAdapter(getContext() , mAllMovies);
 
         setHasOptionsMenu(true);
 
@@ -88,33 +86,33 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
 
         View rootView = inflater.inflate(R.layout.fragment_main, container , false);
         mProgressBar =(ProgressBar) rootView.findViewById(R.id.progress_bar);
-//        mMainGrid = (GridView) rootView.findViewById(R.id.grid);
-        grid = (RecyclerView) rootView.findViewById(R.id.grid);
+        mMainGrid = (GridView) rootView.findViewById(R.id.grid);
+
         if(savedInstanceState != null){
             mAllMovies = (ArrayList<Movie>) savedInstanceState.getSerializable("allmovies");
 
-//            mMainGrid.setAdapter(mArrayAdapter);
-//            mArrayAdapter.notifyDataSetChanged();
-            grid.setAdapter(recycleAdapter);
-            grid.setLayoutManager(new GridLayoutManager(getActivity() , 2));
+            mMainGrid.setAdapter(mArrayAdapter);
+            mArrayAdapter.notifyDataSetChanged();
             if (savedInstanceState.containsKey(SELECTED)){
                 mPosition = savedInstanceState.getInt(SELECTED);
             }
         }else {
             String sortMethod = Utils.getPreferredSortMethod(getActivity());
             updateData(sortMethod);
-//            mArrayAdapter = new MovieArrayAdapter(getContext(), mAllMovies);
-//            mMainGrid.setAdapter(mArrayAdapter);
-//            mArrayAdapter.notifyDataSetChanged();
-            GridLayoutManager lm = new GridLayoutManager(getContext() , 2);
-            lm.setAutoMeasureEnabled(true);
-            lm.setSmoothScrollbarEnabled(true);
-            recycleAdapter = new RecyclerViewMovieAdapter(getContext() , mAllMovies);
-            grid.setAdapter(recycleAdapter);
-            grid.setLayoutManager(lm);
-            recycleAdapter.notifyDataSetChanged();
+            mArrayAdapter = new MovieArrayAdapter(getContext(), mAllMovies);
+            mMainGrid.setAdapter(mArrayAdapter);
+            mArrayAdapter.notifyDataSetChanged();
 
         }
+
+        mMainGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                ((Callback)getActivity()).onMovieSelected(mAllMovies.get(i));
+                mPosition = i;
+            }
+
+        });
 
         return rootView;
     }
@@ -201,9 +199,9 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
                         mAllMovies.add(movies.get(i));
                     }
 
-                   recycleAdapter.notifyDataSetChanged();
+                    mArrayAdapter.notifyDataSetChanged();
                     if (mPosition != GridView.INVALID_POSITION) {
-                        grid.smoothScrollToPosition(mPosition);
+                        mMainGrid.smoothScrollToPosition(mPosition);
                     }
                 }
 
@@ -256,8 +254,7 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
                     mAllMovies.add(movies.get(i));
                 }
 
-//                mArrayAdapter.notifyDataSetChanged();
-                recycleAdapter.notifyDataSetChanged();
+                mArrayAdapter.notifyDataSetChanged();
                 if (mPosition != GridView.INVALID_POSITION) {
                     mMainGrid.smoothScrollToPosition(mPosition);
                 }
