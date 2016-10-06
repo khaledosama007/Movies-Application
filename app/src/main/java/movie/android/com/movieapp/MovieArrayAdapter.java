@@ -61,6 +61,8 @@ public class MovieArrayAdapter extends BaseAdapter implements Serializable {
         Picasso.with(mContext)
                 .load(URLs.IMAGE_BASE_URL + URLs.IMAGE_SIZE + mMovies.get(position).getPosterUrl())
                 .placeholder(R.drawable.ic_movie_placeholder)
+                .resize(400 , 400)
+                .centerInside()
                 .into(holder.poster);
 
         return rootView;

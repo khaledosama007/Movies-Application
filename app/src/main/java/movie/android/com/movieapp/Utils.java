@@ -62,9 +62,9 @@ public class Utils {
 //            e.printStackTrace();
 //        }
         OkHttpClient client = new OkHttpClient();
-        com.squareup.okhttp.Request r = new com.squareup.okhttp.Request.Builder().url(requestUri.toString())
+        com.squareup.okhttp.Request request = new com.squareup.okhttp.Request.Builder().url(requestUri.toString())
                 .build();
-        Response response = client.newCall(r).execute();
+        Response response = client.newCall(request).execute();
         if(response.body().toString()!= null){
             return response.body().string();
         }

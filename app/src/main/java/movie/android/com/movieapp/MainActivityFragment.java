@@ -1,5 +1,7 @@
 package movie.android.com.movieapp;
 
+import android.animation.Animator;
+import android.animation.TimeInterpolator;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -17,6 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ProgressBar;
@@ -24,6 +27,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
+import com.squareup.okhttp.internal.Util;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,9 +50,9 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
     private MovieArrayAdapter mArrayAdapter;
     private static final String SELECTED = "selected_position";
     private int mPosition = GridView.INVALID_POSITION;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private RequestQueue mRequestQueue;
-
+    private int page = 1;
+    boolean loadingMore = true;
+    boolean modeSearch = false;
     public MainActivityFragment() {
 
     }
@@ -113,6 +117,18 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
             }
 
         });
+        mMainGrid.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public boolean onLoadMore(int page, int totalItemsCount) {
+                if(!modeSearch && !(Utils.getPreferredSortMethod(getActivity()).equals("favorites"))) {
+                    new GetMoviesData().execute(new String[]{Utils.getPreferredSortMethod(getActivity()), String.valueOf(page)});
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+        });
 
         return rootView;
     }
@@ -139,7 +155,7 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
             Toast.makeText(getActivity(), "Please Check internet Connection", Toast.LENGTH_LONG).show();
         } else{
                 GetMoviesData task = new GetMoviesData();
-                task.execute(sortMethod);
+                task.execute(new String[]{sortMethod , String.valueOf(page)});
 
         }
     }
@@ -168,9 +184,9 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
 
     @Override
     public boolean onQueryTextSubmit(String s) {
+        modeSearch = true;
         final Uri movieSearch = Uri.parse(URLs.MOVIE_SEARCH).buildUpon()
                 .appendQueryParameter(URLs.API_KEY, BuildConfig.MOVIE_API_KEY).appendQueryParameter("query" , s).build();
-         String response = null;
         new AsyncTask<Uri , Void , ArrayList<Movie> >(){
 
            @Override
@@ -207,24 +223,6 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
 
             }
         }.execute(movieSearch);
-//        ArrayList<Movie> searchData = null;
-//        try {
-//            searchData = parseJson(response);
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//        if(searchData== null){
-//            Toast.makeText(getActivity() , "Network Error , Try Again Later" , Toast.LENGTH_LONG).show();
-//        }
-//        else {
-//            mAllMovies.clear();
-//            for (int i = 0; i < searchData.size(); i++) {
-//                mAllMovies.add(searchData.get(i));
-//            }
-//
-//            mArrayAdapter.notifyDataSetChanged();
-//
-//        }
         return false;
     }
 
@@ -233,7 +231,7 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
         return false;
     }
 
-    public class GetMoviesData extends AsyncTask <String , Void , ArrayList<Movie>>  {
+    public class GetMoviesData extends AsyncTask <String []  , Void , ArrayList<Movie>>  {
         @Override
         protected void onPreExecute(){
             mProgressBar.setVisibility(View.VISIBLE);
@@ -242,6 +240,9 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
 
         @Override
         protected void onPostExecute(ArrayList<Movie> movies) {
+            page++;
+//            loadingMore = false;
+//            stopLoadingData = true;
             mProgressBar.setVisibility(View.GONE);
             super.onPostExecute(movies);
 
@@ -249,6 +250,7 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
                 Toast.makeText(getActivity() , "Network Error , Try Again Later" , Toast.LENGTH_LONG).show();
             }
             else {
+                if(page == 1){
                 mAllMovies.clear();
                 for (int i = 0; i < movies.size(); i++) {
                     mAllMovies.add(movies.get(i));
@@ -258,15 +260,24 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
                 if (mPosition != GridView.INVALID_POSITION) {
                     mMainGrid.smoothScrollToPosition(mPosition);
                 }
+                }
+                else {
+                    mAllMovies.addAll(movies);
+                    mArrayAdapter.notifyDataSetChanged();
+                }
+                loadingMore = false;
             }
 
         }
 
         @Override
-        protected ArrayList<Movie> doInBackground(String... params) {
+        protected ArrayList<Movie> doInBackground(String[] ... params) {
+            loadingMore = true;
             if(!Utils.getPreferredSortMethod(getActivity()).equals("favorites")) {
-                Uri movieRequest = Uri.parse(URLs.MOVIE_BASE_URL).buildUpon().appendPath(params[0])
-                        .appendQueryParameter(URLs.API_KEY, BuildConfig.MOVIE_API_KEY).build();
+                Uri movieRequest = Uri.parse(URLs.MOVIE_BASE_URL).buildUpon().appendPath(params[0][0])
+                        .appendQueryParameter(URLs.API_KEY, BuildConfig.MOVIE_API_KEY)
+                        .appendQueryParameter(URLs.PAGE , params[0][1]).build();
+                        ;
                 try {
                     String responseJson = null;
                     try {
@@ -335,5 +346,70 @@ public class MainActivityFragment extends Fragment implements SearchView.OnQuery
         searchView.setOnQueryTextListener(this);
     }
 
+    public abstract class EndlessScrollListener implements AbsListView.OnScrollListener {
+        // The minimum number of items to have below your current scroll position
+        // before loading more.
+        private int visibleThreshold = 5;
+        // The current offset index of data you have loaded
+        private int currentPage = 0;
+        // The total number of items in the dataset after the last load
+        private int previousTotalItemCount = 0;
+        // True if we are still waiting for the last set of data to load.
+        private boolean loading = true;
+        // Sets the starting page index
+        private int startingPageIndex = 1;
+
+        public EndlessScrollListener() {
+        }
+
+        public EndlessScrollListener(int visibleThreshold) {
+            this.visibleThreshold = visibleThreshold;
+        }
+
+        public EndlessScrollListener(int visibleThreshold, int startPage) {
+            this.visibleThreshold = visibleThreshold;
+            this.startingPageIndex = startPage;
+            this.currentPage = startPage;
+        }
+
+        // This happens many times a second during a scroll, so be wary of the code you place here.
+        // We are given a few useful parameters to help us work out if we need to load some more data,
+        // but first we check if we are waiting for the previous load to finish.
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+        {
+            // If the total item count is zero and the previous isn't, assume the
+            // list is invalidated and should be reset back to initial state
+            if (totalItemCount < previousTotalItemCount) {
+                this.currentPage = this.startingPageIndex;
+                this.previousTotalItemCount = totalItemCount;
+                if (totalItemCount == 0) { this.loading = true; }
+            }
+            // If it's still loading, we check to see if the dataset count has
+            // changed, if so we conclude it has finished loading and update the current page
+            // number and total item count.
+            if (loading && (totalItemCount > previousTotalItemCount)) {
+                loading = false;
+                previousTotalItemCount = totalItemCount;
+                currentPage++;
+            }
+
+            // If it isn't currently loading, we check to see if we have breached
+            // the visibleThreshold and need to reload more data.
+            // If we do need to reload some more data, we execute onLoadMore to fetch the data.
+            if (!loading && (firstVisibleItem + visibleItemCount + visibleThreshold) >= totalItemCount ) {
+                loading = onLoadMore(currentPage + 1, totalItemCount);
+            }
+        }
+
+        // Defines the process for actually loading more data based on page
+        // Returns true if more data is being loaded; returns false if there is no more data to load.
+        public abstract boolean onLoadMore(int page, int totalItemsCount);
+
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+            // Don't take any action on changed
+        }
+    }
 }
 

@@ -132,12 +132,12 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorPrimaryText"
                 android:text="@string/details_title_label"
-                android:layout_marginTop="23dp"
+                android:layout_marginTop="26dp"
                 android:layout_alignParentTop="true"
                 android:layout_toRightOf="@+id/poster_image_view"
                 android:layout_toEndOf="@+id/poster_image_view"
-                android:layout_marginLeft="93dp"
-                android:layout_marginStart="93dp" />
+                android:layout_marginLeft="58dp"
+                android:layout_marginStart="58dp" />
 
 
         </RelativeLayout>

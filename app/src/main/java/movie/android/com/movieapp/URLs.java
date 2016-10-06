@@ -12,6 +12,7 @@ public class URLs {
     public static final String TRAILER_URL = "videos";
     public static final String REVIEW_URL = "reviews";
     public static final String YOUTUBE_LINK = "https://www.youtube.com/watch?v=";
+    public static final String PAGE = "page";
 
 
 }
